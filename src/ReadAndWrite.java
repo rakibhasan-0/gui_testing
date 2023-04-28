@@ -1,8 +1,5 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class ReadAndWrite {
 
@@ -17,6 +14,7 @@ public class ReadAndWrite {
         if( r == JFileChooser.APPROVE_OPTION){
             try{
                 String line = reader.readLine();
+
                 while(line != null){
                     str.append(line);
                     str.append(System.lineSeparator());
@@ -35,6 +33,26 @@ public class ReadAndWrite {
             JOptionPane.showMessageDialog(frame, "The user doesn't want it");
         }
 
+    }
+
+    public static void writeFile(JTextArea textArea, JFrame frame) throws IOException{
+
+        JFileChooser fc = new JFileChooser();
+        int r = fc.showSaveDialog(null);
+
+        if(r == JFileChooser.APPROVE_OPTION){
+            File f = new File(fc.getSelectedFile().getAbsolutePath());
+            try{
+                FileWriter writer = new FileWriter(f,false);
+                BufferedWriter w = new BufferedWriter(writer);
+                w.write(textArea.getText());
+                w.flush();
+                w.close();
+            }
+            catch(IOException e){
+                System.out.println("Something went wrong");
+            }
+        }
     }
 
 }
