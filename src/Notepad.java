@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.io.*;
 
 public class Notepad implements ActionListener {
     JFrame frame;
@@ -25,11 +25,14 @@ public class Notepad implements ActionListener {
 
         JMenuItem open = new JMenuItem("Open");
         file.add(open);
+        System.out.println("action listener added");
         open.addActionListener(this);
+        System.out.println("action listener added");
 
         JScrollPane scroll = new JScrollPane(textArea);
         scroll.setVisible(true);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        frame.getContentPane().add(scroll);
 
         JMenuItem newFile = new JMenuItem("New File");
         file.add(newFile);
@@ -69,13 +72,87 @@ public class Notepad implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource().equals("Open")){
+        System.out.println("it gets called");
+        if(e.getActionCommand().equals("Open")){
+            System.out.println("action has been performed");
             try {
-                ReadAndWrite.readFile(frame,textArea);
+                readFile();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
+        else if(e.getSource().equals("Save")){
+            try {
+                saveFile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        else if (e.getSource().equals("New File")){
+            textArea.setText("");
+        }
+        else if (e.getSource().equals("Cut")){
+            textArea.cut();
+        }
+        else if (e.getSource().equals("Close")){
+            frame.setVisible(false);
+        }
+    }
+
+    private void readFile () throws FileNotFoundException {
+
+        JFileChooser file = new JFileChooser();
+        int r = file.showOpenDialog(null);
+        File f = new File(file.getSelectedFile().getAbsolutePath());
+        BufferedReader reader = new BufferedReader(new FileReader(f));
+        StringBuffer str = new StringBuffer();
+
+        if( r == JFileChooser.APPROVE_OPTION){
+            try{
+                String line = reader.readLine();
+
+                while(line != null){
+                    str.append(line);
+                    str.append(System.lineSeparator());
+                    line = reader.readLine();
+                }
+
+                this.textArea.setText(str.toString());
+                reader.close();
+
+            }
+            catch(Exception e){
+                System.out.println("Error reading");
+            }
+        }
+        else{
+            JOptionPane.showMessageDialog(this.frame, "The user doesn't want it");
+        }
+
+    }
+
+    private void saveFile() throws IOException{
+
+        JFileChooser fc = new JFileChooser();
+        int r = fc.showSaveDialog(null);
+
+        if(r == JFileChooser.APPROVE_OPTION){
+            File f = new File(fc.getSelectedFile().getAbsolutePath());
+            try{
+                FileWriter writer = new FileWriter(f,false);
+                BufferedWriter w = new BufferedWriter(writer);
+                w.write(this.textArea.getText());
+                w.flush();
+                w.close();
+            }
+            catch(IOException e){
+                System.out.println("Something went wrong");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new Notepad();
     }
 
 }
